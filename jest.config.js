@@ -7,7 +7,7 @@ module.exports = {
     '\\.entity\\.ts$',
     '\\.decorator\\.ts$',
     '\\.interceptor\\.ts$',
-    //------- Removed coverage from unit testing -------
+    //--------------------------------------------------
   ],
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',

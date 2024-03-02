@@ -1,0 +1,54 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateTaskInput {
+  description: String!
+  title: String!
+}
+
+input GetTasksFilterInput {
+  search: String
+  status: TaskStatus
+}
+
+type Mutation {
+  createTask(createTaskInput: CreateTaskInput!): Task!
+  deleteTask(id: String!): Boolean
+  updateTaskDescription(updateTaskDescriptionInput: UpdateTaskDescriptionInput!): Task!
+  updateTaskStatus(updateTaskStatusInput: UpdateTaskStatusInput!): Task!
+  updateTaskTitle(updateTaskTitleInput: UpdateTaskTitleInput!): Task!
+}
+
+type Query {
+  getTaskById(id: String!): Task!
+  getTasks(getTasksFilterInput: GetTasksFilterInput!): [Task!]!
+}
+
+type Task {
+  description: String!
+  id: String!
+  status: TaskStatus!
+  title: String!
+}
+
+enum TaskStatus {
+  DONE
+  IN_PROGRESS
+  OPEN
+}
+
+input UpdateTaskDescriptionInput {
+  description: String!
+  id: String!
+}
+
+input UpdateTaskStatusInput {
+  id: String!
+  status: TaskStatus!
+}
+
+input UpdateTaskTitleInput {
+  id: String!
+  title: String!
+}
