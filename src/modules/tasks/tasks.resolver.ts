@@ -15,7 +15,6 @@ import { UpdateTaskDescriptionInput } from './types/update-task-description.inpu
 import { UpdateTaskStatusInput } from './types/update-task-status.input';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 @Resolver((of) => Task)
 @UseGuards(JwtAuthGuard)
 export class TasksResolver {

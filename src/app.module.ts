@@ -7,7 +7,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GraphQLContextMiddleware } from './modules/auth/graphql/graphql-context.middleware';
-import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -22,7 +21,6 @@ import { JwtService } from '@nestjs/jwt';
     AuthModule,
     UserModule,
   ],
-  providers: [JwtService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
