@@ -9,6 +9,7 @@ import { UpdateTaskDescriptionDto } from './dto/update-task-description.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { TasksController } from './tasks.controller';
 import { MyLogger } from '../logger/my-logger.service';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 
 describe('TasksController', () => {
   let tasksController: TasksController;
@@ -59,9 +60,10 @@ describe('TasksController', () => {
 
   describe('getTasks', () => {
     it("should call 'getTasks' from TasksService class and returns an array of tasks", async () => {
-      const response = await tasksController.getTasks({}, user);
+      const filterDto: GetTasksFilterDto = {};
+      const response = await tasksController.getTasks(filterDto, user);
 
-      expect(tasksService.getTasks).toHaveBeenCalled();
+      expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, user);
       expect(response).toBe(tasks);
     });
   });

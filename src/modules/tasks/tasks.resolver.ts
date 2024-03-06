@@ -6,7 +6,7 @@ import { MyLogger } from '../logger/my-logger.service';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CustomContext } from 'src/types/custom-graphql-context.type';
+import { CustomContext } from '../../types/custom-graphql-context.type';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskTitleInput } from './types/update-task-title.input';
 import { UpdateTaskTitleDto } from './dto/update-task-title.dto';

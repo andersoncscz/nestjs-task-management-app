@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Field, InputType } from '@nestjs/graphql';
 import { IsUUID, IsEnum, IsNotEmpty } from 'class-validator';
-import { UUID_VERSION } from 'src/constants';
+import { UUID_VERSION } from '../../../constants';
 import { TaskStatus } from './task.status.enum';
 
 @InputType()
