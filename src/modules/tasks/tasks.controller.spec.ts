@@ -10,6 +10,7 @@ import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { TasksController } from './tasks.controller';
 import { MyLogger } from '../logger/my-logger.service';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { createTasksServiceMock } from './tasks.test-utils';
 
 describe('TasksController', () => {
   let tasksController: TasksController;
@@ -21,24 +22,7 @@ describe('TasksController', () => {
       providers: [
         {
           provide: TasksService,
-          useValue: {
-            getTasks: jest.fn().mockResolvedValue(tasks),
-            getTaskById: jest.fn().mockResolvedValue(taskDone),
-            createTask: jest.fn().mockResolvedValue(taskOpen),
-            deleteTask: jest.fn().mockResolvedValue(null),
-            updateTaskTitle: jest.fn().mockResolvedValue({
-              ...taskInProgress,
-              title: 'title updated',
-            }),
-            updateTaskDescription: jest.fn().mockResolvedValue({
-              ...taskInProgress,
-              description: 'description updated',
-            }),
-            updateTaskStatus: jest.fn().mockResolvedValue({
-              ...taskInProgress,
-              status: TaskStatus.DONE,
-            }),
-          },
+          useValue: createTasksServiceMock({}),
         },
         {
           provide: MyLogger,
@@ -59,7 +43,7 @@ describe('TasksController', () => {
   });
 
   describe('getTasks', () => {
-    it("should call 'getTasks' from TasksService class and returns an array of tasks", async () => {
+    it('should call underlying services and return an array of tasks', async () => {
       const filterDto: GetTasksFilterDto = {};
       const response = await tasksController.getTasks(filterDto, user);
 
@@ -69,7 +53,7 @@ describe('TasksController', () => {
   });
 
   describe('getTaskById', () => {
-    it("should call 'getTaskById' from TasksService class and returns a task by its id", async () => {
+    it('should call underlying services and return a task by its id', async () => {
       const response = await tasksController.getTaskById(taskDone.id, user);
 
       expect(tasksService.getTaskById).toHaveBeenCalled();
@@ -78,7 +62,7 @@ describe('TasksController', () => {
   });
 
   describe('createTask', () => {
-    it("should call 'createTask' from TasksService class to create and return a new task", async () => {
+    it('should call underlying services, create and return a new task', async () => {
       const response = await tasksController.createTask(taskOpen, user);
 
       expect(tasksService.createTask).toHaveBeenCalled();
