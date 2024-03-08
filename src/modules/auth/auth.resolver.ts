@@ -22,6 +22,10 @@ export class AuthResolver {
   async signUp(
     @Args('authCredentialsInput') authCredentialsInput: AuthCredentialsDto,
   ): Promise<void> {
+    this.logger.verbose(
+      `User "${authCredentialsInput.username}" is signing up`,
+    );
+
     return await this.authService.signUp(authCredentialsInput);
   }
 
@@ -30,6 +34,9 @@ export class AuthResolver {
     @Args('authCredentialsInput') { username, password }: AuthCredentialsDto,
   ) {
     const user = await this.passportLocalStrategy.validate(username, password);
+
+    this.logger.verbose(`User "${user.id}" is signing in`);
+
     return this.authService.signIn(user);
   }
 }

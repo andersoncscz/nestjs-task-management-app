@@ -1,25 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuthResolver } from './auth.resolver';
+import { LocalStrategy } from './passport/local.strategy';
 import { AuthService } from './auth.service';
-import { user } from '../users/users.test-data';
-import { AuthController } from './auth.controller';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { MyLogger } from '../logger/my-logger.service';
 import { signInSucceeded } from './auth.test-data';
+import { user } from '../users/users.test-data';
+import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 
-describe('AuthController', () => {
-  let authController: AuthController;
+describe('AuthResolver', () => {
+  let authResolver: AuthResolver;
   let authService: AuthService;
   let logger: MyLogger;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AuthController],
       providers: [
+        AuthResolver,
+        LocalStrategy,
         {
           provide: AuthService,
           useValue: {
             signUp: jest.fn().mockResolvedValue(null),
             signIn: jest.fn().mockResolvedValue(signInSucceeded),
+            validateUser: jest.fn().mockResolvedValue(user),
           },
         },
         {
@@ -32,13 +35,13 @@ describe('AuthController', () => {
       ],
     }).compile();
 
-    authController = module.get<AuthController>(AuthController);
+    authResolver = module.get<AuthResolver>(AuthResolver);
     authService = module.get<AuthService>(AuthService);
     logger = module.get<MyLogger>(MyLogger);
   });
 
   it('should be defined', () => {
-    expect(authController).toBeDefined();
+    expect(authResolver).toBeDefined();
   });
 
   describe('signUp', () => {
@@ -46,7 +49,7 @@ describe('AuthController', () => {
       const { username, password } = user;
       const authCredentialsDto: AuthCredentialsDto = { username, password };
 
-      await authController.signUp(authCredentialsDto);
+      await authResolver.signUp(authCredentialsDto);
 
       expect(logger.verbose).toHaveBeenCalledWith(
         `User "${user.username}" is signing up`,
@@ -58,7 +61,7 @@ describe('AuthController', () => {
 
   describe('signIn', () => {
     it('should call the expected underlying services, create a verbose log and return the expected response', async () => {
-      const response = await authController.signIn(user);
+      const response = await authResolver.signIn(user);
 
       expect(logger.verbose).toHaveBeenCalledWith(
         `User "${user.id}" is signing in`,
