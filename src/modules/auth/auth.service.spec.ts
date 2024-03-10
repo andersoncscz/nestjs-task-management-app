@@ -10,6 +10,7 @@ import { JwtPayload } from './types/jwt-payload.type';
 import { FAKE_JWT } from './auth.test-data';
 import { SignInSucceeded } from './types/sign-in-succeeded.type';
 import { User } from '../users/user.entity';
+import { jwtSignOptions } from './auth.constants';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -73,7 +74,9 @@ describe('AuthService', () => {
       const result = await authService.signIn(user);
       const expectedResult: SignInSucceeded = { access_token: FAKE_JWT };
 
-      expect(jwtService.sign).toHaveBeenCalledWith(payload);
+      expect(jwtService.sign).toHaveBeenCalledWith(payload, {
+        secret: jwtSignOptions.secret,
+      });
       expect(result).toEqual<SignInSucceeded>(expectedResult);
     });
   });
