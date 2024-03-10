@@ -32,6 +32,7 @@ export class AuthController {
     return await this.authService.signUp(authCredentialsDto);
   }
 
+  @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('/signin')
   async signIn(@GetUser() user: User) {

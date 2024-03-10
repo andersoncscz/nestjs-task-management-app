@@ -6,6 +6,7 @@ import { UserService } from '../users/user.service';
 import { comparePassword } from './utils/auth.utils';
 import { User } from '../users/user.entity';
 import { JwtPayload } from './types/jwt-payload.type';
+import { jwtSignOptions } from './auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,9 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {
+        secret: jwtSignOptions.secret,
+      }),
     };
   }
 

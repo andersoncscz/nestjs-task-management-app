@@ -1,4 +1,5 @@
 {
+  "setupFiles": ["dotenv/config"],
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",

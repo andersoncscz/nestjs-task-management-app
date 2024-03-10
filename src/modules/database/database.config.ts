@@ -1,5 +1,7 @@
-export default () => {
-  const databaseConfig = {
+import { DataSource } from 'typeorm';
+
+const databaseConfig = () => {
+  const config = {
     dev: {
       host: process.env.LOCAL_DEV_DATABASE_HOST,
       port: parseInt(process.env.LOCAL_DEV_DATABASE_PORT, 10) || 5432,
@@ -14,6 +16,8 @@ export default () => {
       username: process.env.TEST_DATABASE_USER_NAME,
       password: process.env.TEST_DATABASE_PASSWORD,
       database: process.env.TEST_DATABASE_NAME,
+      synchronize: true,
+      //dropSchema: true,
     },
     staging: {
       host: process.env.STAGING_DATABASE_HOST,
@@ -31,5 +35,11 @@ export default () => {
     },
   };
 
-  return databaseConfig[process.env.NODE_ENV] || databaseConfig.prod;
+  return config[process.env.NODE_ENV] || config.prod;
 };
+
+export const dataSource = new DataSource({
+  ...databaseConfig(),
+  type: 'postgres',
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+});
