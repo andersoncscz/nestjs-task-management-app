@@ -4,10 +4,6 @@ import { AuthModule } from './auth.module';
 import * as request from 'supertest';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { user } from '../users/users.test-data';
-import {
-  cleanupDatabase,
-  closeDatabaseConnection,
-} from '../database/database.utils';
 import { MyLogger } from '../logger/my-logger.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersRepository } from '../users/users.repository';
@@ -15,9 +11,16 @@ import { databaseProviders } from '../database/database.providers';
 import { userProviders } from '../users/user.providers';
 import { AuthController } from './auth.controller';
 import { AuthResolver } from './auth.resolver';
+import { DATA_SOURCE } from '../database/constants';
+import { DataSource } from 'typeorm';
+import {
+  cleanupDatabase,
+  closeDatabaseConnection,
+} from '../database/database.test-utils';
 
 describe('Auth', () => {
   let app: INestApplication;
+  let dataSource: DataSource;
   let usersRepository: UsersRepository;
 
   beforeAll(async () => {
@@ -40,16 +43,17 @@ describe('Auth', () => {
     app = module.createNestApplication();
     await app.init();
 
+    dataSource = module.get<DataSource>(DATA_SOURCE);
     usersRepository = module.get<UsersRepository>(UsersRepository);
   });
 
   afterEach(async () => {
-    await cleanupDatabase();
+    await cleanupDatabase(dataSource);
   });
 
   afterAll(async () => {
-    await cleanupDatabase();
-    await closeDatabaseConnection();
+    await cleanupDatabase(dataSource);
+    await closeDatabaseConnection(dataSource);
     await app.close();
   });
 
