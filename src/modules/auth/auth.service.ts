@@ -19,6 +19,7 @@ export class AuthService {
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<SignInSucceeded> {
     const user = await this.userService.signUp(authCredentialsDto);
+
     return await this.signIn(user);
   }
 
