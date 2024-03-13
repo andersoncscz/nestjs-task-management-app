@@ -15,8 +15,11 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    return await this.userService.signUp(authCredentialsDto);
+  async signUp(
+    authCredentialsDto: AuthCredentialsDto,
+  ): Promise<SignInSucceeded> {
+    const user = await this.userService.signUp(authCredentialsDto);
+    return await this.signIn(user);
   }
 
   async signIn(user: User): Promise<SignInSucceeded> {

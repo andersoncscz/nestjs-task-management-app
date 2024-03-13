@@ -1,11 +1,9 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthModule } from './auth.module';
 import * as request from 'supertest';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { user } from '../users/users.test-data';
 import { MyLogger } from '../logger/my-logger.service';
-import { JwtModule } from '@nestjs/jwt';
 import { UsersRepository } from '../users/users.repository';
 import { databaseProviders } from '../database/database.providers';
 import { userProviders } from '../users/user.providers';
@@ -17,6 +15,8 @@ import {
   cleanupDatabase,
   closeDatabaseConnection,
 } from '../database/database.test-utils';
+import { AppModule } from '../../app.module';
+import { SignInSucceeded } from './types/sign-in-succeeded.type';
 
 describe('Auth', () => {
   let app: INestApplication;
@@ -25,7 +25,7 @@ describe('Auth', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AuthModule, JwtModule],
+      imports: [AppModule],
       providers: [
         ...databaseProviders,
         ...userProviders,
@@ -58,39 +58,128 @@ describe('Auth', () => {
   });
 
   describe(AuthController, () => {
-    it(`/POST /api/auth/signup`, async () => {
-      const authCredentialsDto: AuthCredentialsDto = {
-        username: user.username,
-        password: user.password,
-      };
+    describe('/POST /api/auth/signup', () => {
+      it('signs up a user', async () => {
+        const authCredentialsDto: AuthCredentialsDto = {
+          username: user.username,
+          password: user.password,
+        };
 
-      return await request(app.getHttpServer())
-        .post('/api/auth/signup')
-        .send(authCredentialsDto)
-        .expect(HttpStatus.CREATED);
+        const expectedResponseBody: SignInSucceeded = {
+          access_token: expect.any(String),
+        };
+
+        return await request(app.getHttpServer())
+          .post('/api/auth/signup')
+          .send(authCredentialsDto)
+          .expect(HttpStatus.CREATED)
+          .expect(({ text }) => {
+            const responseBody = JSON.parse(text) as SignInSucceeded;
+
+            expect(responseBody).toEqual(expectedResponseBody);
+            expect(responseBody.access_token.length > 0).toBeTruthy();
+          });
+      });
     });
 
-    it(`/POST /api/auth/signin`, async () => {
-      const authCredentialsDto: AuthCredentialsDto = {
-        username: 'newuser@x.com',
-        password: 'password',
-      };
+    describe('/POST /api/auth/signin', () => {
+      it('signs in a user', async () => {
+        const authCredentialsDto: AuthCredentialsDto = {
+          username: 'newuser@x.com',
+          password: 'password',
+        };
 
-      await usersRepository.create(authCredentialsDto);
+        await usersRepository.create(authCredentialsDto);
 
-      return await request(app.getHttpServer())
-        .post('/api/auth/signin')
-        .send(authCredentialsDto)
-        .expect(HttpStatus.OK)
-        .expect((res) => {
-          expect(res.body.access_token).toBeDefined();
-        });
+        const expectedResponseBody: SignInSucceeded = {
+          access_token: expect.any(String),
+        };
+
+        return await request(app.getHttpServer())
+          .post('/api/auth/signin')
+          .send(authCredentialsDto)
+          .expect(HttpStatus.OK)
+          .expect(({ text }) => {
+            const responseBody = JSON.parse(text) as SignInSucceeded;
+
+            expect(responseBody).toEqual(expectedResponseBody);
+            expect(responseBody.access_token.length > 0).toBeTruthy();
+          });
+      });
     });
   });
 
   describe(AuthResolver, () => {
-    it('TODO: add tests for GQL operations', () => {
-      expect(true).toBeTruthy();
+    describe('mutation', () => {
+      describe('signUp', () => {
+        it('signs up a user', async () => {
+          const signUpMutationInput = {
+            authCredentialsInput: {
+              username: 'newuser@x.com',
+              password: 'password123',
+            },
+          };
+
+          const expectedResponseBody: SignInSucceeded = {
+            access_token: expect.any(String),
+          };
+
+          const response = await request(app.getHttpServer())
+            .post('/graphql')
+            .send({
+              query: `
+                mutation SignUp($authCredentialsInput: AuthCredentialsInput!) {
+                  signUp(authCredentialsInput: $authCredentialsInput) {
+                    access_token
+                  }
+                }
+              `,
+              variables: signUpMutationInput,
+            })
+            .expect(200);
+
+          const mutationResult = response.body.data.signUp;
+          expect(mutationResult).toEqual(expectedResponseBody);
+          expect(mutationResult.access_token.length > 0).toBeTruthy();
+        });
+      });
+
+      describe('signIn', () => {
+        it('signs in a user', async () => {
+          const signInMutationInput = {
+            authCredentialsInput: {
+              username: 'newuser@x.com',
+              password: 'password123',
+            },
+          };
+
+          await usersRepository.create(
+            signInMutationInput.authCredentialsInput,
+          );
+
+          const expectedResponseBody: SignInSucceeded = {
+            access_token: expect.any(String),
+          };
+
+          const response = await request(app.getHttpServer())
+            .post('/graphql')
+            .send({
+              query: `
+                mutation SignIn($authCredentialsInput: AuthCredentialsInput!) {
+                  signIn(authCredentialsInput: $authCredentialsInput) {
+                    access_token
+                  }
+                }
+              `,
+              variables: signInMutationInput,
+            })
+            .expect(HttpStatus.OK);
+
+          const mutationResult = response.body.data.signIn;
+          expect(mutationResult).toEqual(expectedResponseBody);
+          expect(mutationResult.access_token.length > 0).toBeTruthy();
+        });
+      });
     });
   });
 });

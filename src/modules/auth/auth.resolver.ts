@@ -18,15 +18,15 @@ export class AuthResolver {
     this.logger.setContext(AuthResolver.name);
   }
 
-  @Mutation((returns) => Boolean, { nullable: true })
+  @Mutation((returns) => SignInSucceeded)
   async signUp(
     @Args('authCredentialsInput') authCredentialsInput: AuthCredentialsDto,
-  ): Promise<void> {
+  ): Promise<SignInSucceeded> {
     this.logger.verbose(
       `User "${authCredentialsInput.username}" is signing up`,
     );
 
-    return await this.authService.signUp(authCredentialsInput);
+    return this.authService.signUp(authCredentialsInput);
   }
 
   @Mutation((returns) => SignInSucceeded)

@@ -11,7 +11,7 @@ export class UserService {
     return await this.userRepository.findByUsername(username);
   }
 
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     return await this.userRepository.create(authCredentialsDto);
   }
 }

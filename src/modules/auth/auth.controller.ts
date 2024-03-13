@@ -13,6 +13,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { User } from '../users/user.entity';
 import { MyLogger } from '../logger/my-logger.service';
+import { SignInSucceeded } from './types/sign-in-succeeded.type';
 
 @PublicRoute()
 @Controller('/api/auth')
@@ -26,10 +27,12 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/signup')
-  async signUp(@Body() authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async signUp(
+    @Body() authCredentialsDto: AuthCredentialsDto,
+  ): Promise<SignInSucceeded> {
     this.logger.verbose(`User "${authCredentialsDto.username}" is signing up`);
 
-    return await this.authService.signUp(authCredentialsDto);
+    return this.authService.signUp(authCredentialsDto);
   }
 
   @HttpCode(HttpStatus.OK)

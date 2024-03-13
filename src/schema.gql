@@ -21,7 +21,7 @@ type Mutation {
   createTask(createTaskInput: CreateTaskInput!): Task!
   deleteTask(id: String!): Boolean
   signIn(authCredentialsInput: AuthCredentialsInput!): SignInSucceeded!
-  signUp(authCredentialsInput: AuthCredentialsInput!): Boolean
+  signUp(authCredentialsInput: AuthCredentialsInput!): SignInSucceeded!
   updateTaskDescription(updateTaskDescriptionInput: UpdateTaskDescriptionInput!): Task!
   updateTaskStatus(updateTaskStatusInput: UpdateTaskStatusInput!): Task!
   updateTaskTitle(updateTaskTitleInput: UpdateTaskTitleInput!): Task!

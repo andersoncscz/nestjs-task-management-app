@@ -24,7 +24,7 @@ export class UsersRepository {
     this.logger.setContext(UsersRepository.name);
   }
 
-  async create(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async create(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     const { username, password } = authCredentialsDto;
     try {
       const hashedPassword = await hashPassword(password);
@@ -34,7 +34,7 @@ export class UsersRepository {
         password: hashedPassword,
       });
 
-      await this.repository.save(user);
+      return await this.repository.save(user);
     } catch (error) {
       if (isUserAlreadyExistsError(error)) {
         this.logger.error(`User "${username}" already exists`, error.stack);
