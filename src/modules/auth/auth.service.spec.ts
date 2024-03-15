@@ -83,13 +83,13 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return the user object when passwords match', async () => {
-      jest.spyOn(AuthUtilsModule, 'comparePassword').mockResolvedValue(true);
+      jest.spyOn(AuthUtilsModule, 'verifyIfPasswordIsCorrect').mockResolvedValue(true);
 
       const result = await authService.validateUser(user.username, 'password');
 
       expect(result).toEqual<User>(user);
       expect(userService.findByUsername).toHaveBeenCalledWith(user.username);
-      expect(AuthUtilsModule.comparePassword).toHaveBeenCalledWith(
+      expect(AuthUtilsModule.verifyIfPasswordIsCorrect).toHaveBeenCalledWith(
         'password',
         user.password,
       );
@@ -103,7 +103,7 @@ describe('AuthService', () => {
 
       expect(result).toBeNull();
       expect(userService.findByUsername).toHaveBeenCalledWith(user.username);
-      expect(AuthUtilsModule.comparePassword).toHaveBeenCalledWith(
+      expect(AuthUtilsModule.verifyIfPasswordIsCorrect).toHaveBeenCalledWith(
         'wrong-password',
         user.password,
       );

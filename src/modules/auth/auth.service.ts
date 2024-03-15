@@ -3,7 +3,7 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SignInSucceeded } from './types/sign-in-succeeded.type';
 import { UserService } from '../users/user.service';
-import { comparePassword } from './utils/auth.utils';
+import { verifyIfPasswordIsCorrect } from './utils/auth.utils';
 import { User } from '../users/user.entity';
 import { JwtPayload } from './types/jwt-payload.type';
 import { jwtSignOptions } from './auth.constants';
@@ -37,11 +37,14 @@ export class AuthService {
   }
 
   async validateUser(username: string, pass: string): Promise<any> {
+    let passwordIsCorrect = false;
     const user = await this.userService.findByUsername(username);
-    const passwordMatches = await comparePassword(pass, user.password);
 
-    if (user && passwordMatches) {
-      return user;
+    if (user) {
+      passwordIsCorrect = await verifyIfPasswordIsCorrect(pass, user.password);
+      if (passwordIsCorrect) {
+        return user;
+      }
     }
 
     return null;

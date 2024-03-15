@@ -179,6 +179,75 @@ describe('Auth', () => {
           expect(mutationResult).toEqual(expectedResponseBody);
           expect(mutationResult.access_token.length > 0).toBeTruthy();
         });
+
+        it("throws 'Unauthorized' error when user exists but credentials are wrong", async () => {
+          const signInMutationInput = {
+            authCredentialsInput: {
+              username: 'newuser@x.com',
+              password: 'password123',
+            },
+          };
+
+          await usersRepository.create(
+            signInMutationInput.authCredentialsInput,
+          );
+
+          await request(app.getHttpServer())
+            .post('/graphql')
+            .send({
+              query: `
+                mutation SignIn($authCredentialsInput: AuthCredentialsInput!) {
+                  signIn(authCredentialsInput: $authCredentialsInput) {
+                    access_token
+                  }
+                }
+              `,
+              variables: {
+                authCredentialsInput: {
+                  ...signInMutationInput.authCredentialsInput,
+                  password: 'wrong-password',
+                },
+              },
+            })
+            .expect(HttpStatus.OK)
+            .expect((response) => {
+              expect(response.body.data).toBeNull();
+              expect(response.body.errors[0].message).toBe('Unauthorized');
+              expect(
+                response.body.errors[0].extensions.originalError.statusCode,
+              ).toBe(401);
+            });
+        });
+
+        it("throws 'Unauthorized' error when user does not exist", async () => {
+          const signInMutationInput = {
+            authCredentialsInput: {
+              username: 'unexisting-user@x.com',
+              password: 'password123',
+            },
+          };
+
+          await request(app.getHttpServer())
+            .post('/graphql')
+            .send({
+              query: `
+                mutation SignIn($authCredentialsInput: AuthCredentialsInput!) {
+                  signIn(authCredentialsInput: $authCredentialsInput) {
+                    access_token
+                  }
+                }
+              `,
+              variables: signInMutationInput,
+            })
+            .expect(HttpStatus.OK)
+            .expect((response) => {
+              expect(response.body.data).toBeNull();
+              expect(response.body.errors[0].message).toBe('Unauthorized');
+              expect(
+                response.body.errors[0].extensions.originalError.statusCode,
+              ).toBe(401);
+            });
+        });
       });
     });
   });

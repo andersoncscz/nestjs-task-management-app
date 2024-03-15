@@ -48,7 +48,7 @@ export class UsersRepository {
     }
   }
 
-  async findByUsername(username: string): Promise<User | null> {
+  async findByUsername(username: string): Promise<User> {
     return await this.repository.findOne({
       where: {
         username,

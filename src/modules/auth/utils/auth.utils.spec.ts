@@ -1,4 +1,4 @@
-import { comparePassword, hashPassword } from './auth.utils';
+import { verifyIfPasswordIsCorrect, hashPassword } from './auth.utils';
 
 describe('hashPassword', () => {
   it('should return a hashed password', async () => {
@@ -11,11 +11,11 @@ describe('hashPassword', () => {
   });
 });
 
-describe('comparePassword', () => {
+describe('verifyIfPasswordIsCorrect', () => {
   it('should return true when password and hashedPassword match', async () => {
     const password = 'my-password';
     const hashedPassword = await hashPassword(password);
-    const isGivenPasswordCorrect = await comparePassword(
+    const isGivenPasswordCorrect = await verifyIfPasswordIsCorrect(
       password,
       hashedPassword,
     );
@@ -26,7 +26,7 @@ describe('comparePassword', () => {
     const password = 'my-password';
     const wrongPassword = 'my-wrong-password';
     const hashedPassword = await hashPassword(password);
-    const isGivenPasswordCorrect = await comparePassword(
+    const isGivenPasswordCorrect = await verifyIfPasswordIsCorrect(
       wrongPassword,
       hashedPassword,
     );
