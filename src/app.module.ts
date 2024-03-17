@@ -10,7 +10,9 @@ import { GraphQLContextMiddleware } from './modules/auth/graphql/graphql-context
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: [`.env.${process.env.NODE_ENV}`],
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       sortSchema: true,
