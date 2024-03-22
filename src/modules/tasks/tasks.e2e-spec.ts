@@ -12,6 +12,7 @@ import {
   closeDatabaseConnection,
 } from '../database/database.test-utils';
 import { taskProviders } from './task.providers';
+import { TasksResolver } from './tasks.resolver';
 
 describe('Tasks', () => {
   let app: INestApplication;
@@ -53,7 +54,13 @@ describe('Tasks', () => {
   });
 
   describe(TasksController, () => {
-    it('fake test', () => {
+    it('TODO: Add tests', () => {
+      expect(tasksRepository).toBeDefined();
+    });
+  });
+
+  describe(TasksResolver, () => {
+    it('TODO: Add tests', () => {
       expect(tasksRepository).toBeDefined();
     });
   });

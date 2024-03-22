@@ -58,11 +58,13 @@ describe('Auth', () => {
   });
 
   describe(AuthController, () => {
+    const { username, password } = user;
+
     describe('/POST /api/auth/signup', () => {
       it('signs up a user', async () => {
         const authCredentialsDto: AuthCredentialsDto = {
-          username: user.username,
-          password: user.password,
+          username,
+          password,
         };
 
         const expectedResponseBody: SignInSucceeded = {
@@ -85,8 +87,8 @@ describe('Auth', () => {
     describe('/POST /api/auth/signin', () => {
       it('signs in a user', async () => {
         const authCredentialsDto: AuthCredentialsDto = {
-          username: 'newuser@x.com',
-          password: 'password',
+          username,
+          password,
         };
 
         await usersRepository.create(authCredentialsDto);
@@ -110,13 +112,15 @@ describe('Auth', () => {
   });
 
   describe(AuthResolver, () => {
+    const { username, password } = user;
+
     describe('mutation', () => {
       describe('signUp', () => {
         it('signs up a user', async () => {
-          const signUpMutationInput = {
+          const signUpMutationVariables = {
             authCredentialsInput: {
-              username: 'newuser@x.com',
-              password: 'password123',
+              username,
+              password,
             },
           };
 
@@ -134,7 +138,7 @@ describe('Auth', () => {
                   }
                 }
               `,
-              variables: signUpMutationInput,
+              variables: signUpMutationVariables,
             })
             .expect(200);
 
@@ -146,16 +150,14 @@ describe('Auth', () => {
 
       describe('signIn', () => {
         it('signs in a user', async () => {
-          const signInMutationInput = {
+          const signInMutationVariables = {
             authCredentialsInput: {
-              username: 'newuser@x.com',
-              password: 'password123',
+              username,
+              password,
             },
           };
 
-          await usersRepository.create(
-            signInMutationInput.authCredentialsInput,
-          );
+          await usersRepository.create({ username, password });
 
           const expectedResponseBody: SignInSucceeded = {
             access_token: expect.any(String),
@@ -171,7 +173,7 @@ describe('Auth', () => {
                   }
                 }
               `,
-              variables: signInMutationInput,
+              variables: signInMutationVariables,
             })
             .expect(HttpStatus.OK);
 
@@ -181,16 +183,16 @@ describe('Auth', () => {
         });
 
         it("throws 'Unauthorized' error when user exists but credentials are wrong", async () => {
-          const signInMutationInput = {
+          const signInMutationVariables = {
             authCredentialsInput: {
-              username: 'newuser@x.com',
-              password: 'password123',
+              username,
+              password: 'wrong-password',
             },
           };
 
-          await usersRepository.create(
-            signInMutationInput.authCredentialsInput,
-          );
+          const { authCredentialsInput } = signInMutationVariables;
+
+          await usersRepository.create({ username, password });
 
           await request(app.getHttpServer())
             .post('/graphql')
@@ -203,10 +205,7 @@ describe('Auth', () => {
                 }
               `,
               variables: {
-                authCredentialsInput: {
-                  ...signInMutationInput.authCredentialsInput,
-                  password: 'wrong-password',
-                },
+                authCredentialsInput,
               },
             })
             .expect(HttpStatus.OK)
@@ -220,10 +219,10 @@ describe('Auth', () => {
         });
 
         it("throws 'Unauthorized' error when user does not exist", async () => {
-          const signInMutationInput = {
+          const signInMutationVariables = {
             authCredentialsInput: {
               username: 'unexisting-user@x.com',
-              password: 'password123',
+              password,
             },
           };
 
@@ -237,7 +236,7 @@ describe('Auth', () => {
                   }
                 }
               `,
-              variables: signInMutationInput,
+              variables: signInMutationVariables,
             })
             .expect(HttpStatus.OK)
             .expect((response) => {
