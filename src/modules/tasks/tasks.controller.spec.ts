@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksService } from './tasks.service';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { taskDone, taskInProgress, taskOpen, tasks } from './tasks.test-data';
 import { UpdateTaskTitleDto } from './dto/update-task-title.dto';
 import { TaskStatus } from './types/task.status.enum';
@@ -45,16 +45,16 @@ describe('TasksController', () => {
   describe('getTasks', () => {
     it('should call underlying services and return an array of tasks', async () => {
       const filterDto: GetTasksFilterDto = {};
-      const response = await tasksController.getTasks(filterDto, user);
+      const response = await tasksController.getTasks(filterDto, userMock);
 
-      expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, user);
+      expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, userMock);
       expect(response).toBe(tasks);
     });
   });
 
   describe('getTaskById', () => {
     it('should call underlying services and return a task by its id', async () => {
-      const response = await tasksController.getTaskById(taskDone.id, user);
+      const response = await tasksController.getTaskById(taskDone.id, userMock);
 
       expect(tasksService.getTaskById).toHaveBeenCalled();
       expect(response).toBe(taskDone);
@@ -63,7 +63,7 @@ describe('TasksController', () => {
 
   describe('createTask', () => {
     it('should call underlying services, create and return a new task', async () => {
-      const response = await tasksController.createTask(taskOpen, user);
+      const response = await tasksController.createTask(taskOpen, userMock);
 
       expect(tasksService.createTask).toHaveBeenCalled();
       expect(response).toBe(taskOpen);
@@ -72,7 +72,7 @@ describe('TasksController', () => {
 
   describe('deleteTask', () => {
     it("should call 'deleteTask' from TasksService class to delete a task", async () => {
-      const response = await tasksController.deleteTask(taskOpen.id, user);
+      const response = await tasksController.deleteTask(taskOpen.id, userMock);
 
       expect(tasksService.deleteTask).toHaveBeenCalled();
       expect(response).toBe(null);
@@ -89,7 +89,7 @@ describe('TasksController', () => {
       const response = await tasksController.updateTaskTitle(
         taskOpen.id,
         updateTaskTitleDto,
-        user,
+        userMock,
       );
 
       const taskUpdated: Task = {
@@ -100,7 +100,7 @@ describe('TasksController', () => {
       expect(tasksService.updateTaskTitle).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskTitleDto,
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });
@@ -116,7 +116,7 @@ describe('TasksController', () => {
       const response = await tasksController.updateTaskDescription(
         taskOpen.id,
         updateTaskDescriptionDto,
-        user,
+        userMock,
       );
 
       const taskUpdated: Task = {
@@ -127,7 +127,7 @@ describe('TasksController', () => {
       expect(tasksService.updateTaskDescription).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskDescriptionDto,
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });
@@ -143,7 +143,7 @@ describe('TasksController', () => {
       const response = await tasksController.updateTaskStatus(
         taskOpen.id,
         updateTaskStatusDto,
-        user,
+        userMock,
       );
 
       const taskUpdated: Task = {
@@ -154,7 +154,7 @@ describe('TasksController', () => {
       expect(tasksService.updateTaskStatus).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskStatusDto,
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });

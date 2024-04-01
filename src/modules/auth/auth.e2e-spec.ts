@@ -2,7 +2,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { MyLogger } from '../logger/my-logger.service';
 import { UsersRepository } from '../users/users.repository';
 import { databaseProviders } from '../database/database.providers';
@@ -58,7 +58,7 @@ describe('Auth', () => {
   });
 
   describe(AuthController, () => {
-    const { username, password } = user;
+    const { username, password } = userMock;
 
     describe('/POST /api/auth/signup', () => {
       it('signs up a user', async () => {
@@ -112,7 +112,7 @@ describe('Auth', () => {
   });
 
   describe(AuthResolver, () => {
-    const { username, password } = user;
+    const { username, password } = userMock;
 
     describe('mutation', () => {
       describe('signUp', () => {

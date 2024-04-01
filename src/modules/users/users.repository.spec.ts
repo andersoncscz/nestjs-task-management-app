@@ -6,7 +6,7 @@ import { AuthCredentialsDto } from '../auth/dto/auth-credentials.dto';
 import { MyLogger } from '../logger/my-logger.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { USER_REPOSITORY } from './user.constants';
-import { user } from './users.test-data';
+import { userMock } from './users.test-data';
 import * as AuthUtilsModule from '../auth/utils/auth.utils';
 import * as DatabaseUtilsModule from '../database/database.utils';
 
@@ -50,11 +50,11 @@ describe('UsersRepository', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const authCredentialsDto: AuthCredentialsDto = {
-        username: user.username,
-        password: user.password,
+        username: userMock.username,
+        password: userMock.password,
       };
 
-      jest.spyOn(repository, 'create').mockReturnValue(user);
+      jest.spyOn(repository, 'create').mockReturnValue(userMock);
       jest.spyOn(AuthUtilsModule, 'hashPassword');
       jest.spyOn(repository, 'save').mockResolvedValue(undefined);
 
@@ -63,19 +63,19 @@ describe('UsersRepository', () => {
       expect(AuthUtilsModule.hashPassword).toHaveBeenCalledWith(
         authCredentialsDto.password,
       );
-      expect(repository.save).toHaveBeenCalledWith(user);
+      expect(repository.save).toHaveBeenCalledWith(userMock);
     });
 
     it('should throw UserAlreadyExistsError if user already exists', async () => {
       const authCredentialsDto: AuthCredentialsDto = {
-        username: user.username,
-        password: user.password,
+        username: userMock.username,
+        password: userMock.password,
       };
 
       jest
         .spyOn(DatabaseUtilsModule, 'isQueryFailedError')
         .mockReturnValue(true);
-      jest.spyOn(repository, 'create').mockReturnValue(user);
+      jest.spyOn(repository, 'create').mockReturnValue(userMock);
       jest.spyOn(AuthUtilsModule, 'hashPassword');
       jest
         .spyOn(repository, 'save')
@@ -90,7 +90,7 @@ describe('UsersRepository', () => {
         authCredentialsDto.password,
       );
 
-      expect(repository.save).toHaveBeenCalledWith(user);
+      expect(repository.save).toHaveBeenCalledWith(userMock);
 
       expect(myLogger.error).toHaveBeenCalledWith(
         `User "${authCredentialsDto.username}" already exists`,
@@ -100,14 +100,14 @@ describe('UsersRepository', () => {
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
       const authCredentialsDto: AuthCredentialsDto = {
-        username: user.username,
-        password: user.password,
+        username: userMock.username,
+        password: userMock.password,
       };
 
       jest
         .spyOn(DatabaseUtilsModule, 'isQueryFailedError')
         .mockReturnValue(true);
-      jest.spyOn(repository, 'create').mockReturnValue(user);
+      jest.spyOn(repository, 'create').mockReturnValue(userMock);
       jest.spyOn(AuthUtilsModule, 'hashPassword');
       jest.spyOn(repository, 'save').mockRejectedValue(new Error());
 
@@ -119,7 +119,7 @@ describe('UsersRepository', () => {
         authCredentialsDto.password,
       );
 
-      expect(repository.save).toHaveBeenCalledWith(user);
+      expect(repository.save).toHaveBeenCalledWith(userMock);
 
       expect(myLogger.error).toHaveBeenCalledWith(
         `Failed to create user "${authCredentialsDto.username}"`,
@@ -130,11 +130,11 @@ describe('UsersRepository', () => {
 
   describe('findByUsername', () => {
     it('should find a user by username', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(userMock);
 
-      const result = await usersRepository.findByUsername(user.username);
+      const result = await usersRepository.findByUsername(userMock.username);
 
-      expect(result).toEqual<User>(user);
+      expect(result).toEqual<User>(userMock);
     });
 
     it('should return null if user does not exist', async () => {

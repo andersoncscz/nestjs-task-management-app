@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { MyLogger } from '../logger/my-logger.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/user.service';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import * as AuthUtilsModule from './utils/auth.utils';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtPayload } from './types/jwt-payload.type';
@@ -25,8 +25,8 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: {
-            signUp: jest.fn().mockResolvedValue(user),
-            findByUsername: jest.fn().mockResolvedValue(user),
+            signUp: jest.fn().mockResolvedValue(userMock),
+            findByUsername: jest.fn().mockResolvedValue(userMock),
           },
         },
         {
@@ -55,7 +55,7 @@ describe('AuthService', () => {
 
   describe('signUp', () => {
     it('should call the expected functions', async () => {
-      const { username, password } = user;
+      const { username, password } = userMock;
       const authCredentialsDto: AuthCredentialsDto = { username, password };
 
       await authService.signUp(authCredentialsDto);
@@ -70,8 +70,11 @@ describe('AuthService', () => {
         .spyOn(jwtService, 'sign')
         .mockImplementation(jest.fn().mockReturnValue(FAKE_JWT));
 
-      const payload: JwtPayload = { sub: user.id, username: user.username };
-      const result = await authService.signIn(user);
+      const payload: JwtPayload = {
+        sub: userMock.id,
+        username: userMock.username,
+      };
+      const result = await authService.signIn(userMock);
       const expectedResult: SignInSucceeded = { access_token: FAKE_JWT };
 
       expect(jwtService.sign).toHaveBeenCalledWith(payload, {
@@ -83,29 +86,38 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return the user object when passwords match', async () => {
-      jest.spyOn(AuthUtilsModule, 'verifyIfPasswordIsCorrect').mockResolvedValue(true);
+      jest
+        .spyOn(AuthUtilsModule, 'verifyIfPasswordIsCorrect')
+        .mockResolvedValue(true);
 
-      const result = await authService.validateUser(user.username, 'password');
+      const result = await authService.validateUser(
+        userMock.username,
+        'password',
+      );
 
-      expect(result).toEqual<User>(user);
-      expect(userService.findByUsername).toHaveBeenCalledWith(user.username);
+      expect(result).toEqual<User>(userMock);
+      expect(userService.findByUsername).toHaveBeenCalledWith(
+        userMock.username,
+      );
       expect(AuthUtilsModule.verifyIfPasswordIsCorrect).toHaveBeenCalledWith(
         'password',
-        user.password,
+        userMock.password,
       );
     });
 
     it('should return null when passwords do not match', async () => {
       const result = await authService.validateUser(
-        user.username,
+        userMock.username,
         'wrong-password',
       );
 
       expect(result).toBeNull();
-      expect(userService.findByUsername).toHaveBeenCalledWith(user.username);
+      expect(userService.findByUsername).toHaveBeenCalledWith(
+        userMock.username,
+      );
       expect(AuthUtilsModule.verifyIfPasswordIsCorrect).toHaveBeenCalledWith(
         'wrong-password',
-        user.password,
+        userMock.password,
       );
     });
   });

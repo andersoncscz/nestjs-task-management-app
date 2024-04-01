@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UsersRepository } from './users.repository';
-import { user } from './users.test-data';
+import { userMock } from './users.test-data';
 import { AuthCredentialsDto } from '../auth/dto/auth-credentials.dto';
 
 describe('UserService', () => {
@@ -15,7 +15,7 @@ describe('UserService', () => {
         {
           provide: UsersRepository,
           useValue: {
-            findByUsername: jest.fn().mockResolvedValue(user),
+            findByUsername: jest.fn().mockResolvedValue(userMock),
             create: jest.fn().mockResolvedValue(null),
           },
         },
@@ -32,20 +32,20 @@ describe('UserService', () => {
 
   describe('findByUsername', () => {
     it("should call 'findByUsername' method from UsersRepository class", async () => {
-      const userFound = await userService.findByUsername(user.username);
+      const userFound = await userService.findByUsername(userMock.username);
 
       expect(usersRepository.findByUsername).toHaveBeenCalledWith(
-        user.username,
+        userMock.username,
       );
-      expect(userFound).toBe(user);
+      expect(userFound).toBe(userMock);
     });
   });
 
   describe('signUp', () => {
     it("should call 'create' method from UsersRepository class", async () => {
       const authCredentialsDto: AuthCredentialsDto = {
-        username: user.username,
-        password: user.password,
+        username: userMock.username,
+        password: userMock.password,
       };
 
       await userService.signUp(authCredentialsDto);

@@ -5,7 +5,7 @@ import { TaskStatus } from './types/task.status.enum';
 import { MyLogger } from '../logger/my-logger.service';
 import { TasksResolver } from './tasks.resolver';
 import { TasksService } from './tasks.service';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { CustomContext } from '../../types/custom-graphql-context.type';
 import { UpdateTaskTitleInput } from './types/update-task-title.input';
 import { Task } from './task.model';
@@ -19,7 +19,7 @@ describe('TasksResolver', () => {
 
   const contextMock = {
     req: {
-      user,
+      user: userMock,
     },
   } as unknown as CustomContext;
 
@@ -55,7 +55,7 @@ describe('TasksResolver', () => {
       const filterDto: GetTasksFilterDto = {};
       const response = await tasksResolver.getTasks(filterDto, contextMock);
 
-      expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, user);
+      expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, userMock);
       expect(response).toEqual(tasks);
     });
   });
@@ -111,7 +111,7 @@ describe('TasksResolver', () => {
       expect(tasksService.updateTaskTitle).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskTitleDto: { title: newTitle },
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });
@@ -138,7 +138,7 @@ describe('TasksResolver', () => {
       expect(tasksService.updateTaskDescription).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskDescriptionDto: { description: newDescription },
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });
@@ -165,7 +165,7 @@ describe('TasksResolver', () => {
       expect(tasksService.updateTaskStatus).toHaveBeenCalledWith({
         id: taskOpen.id,
         updateTaskStatusDto: { status: newStatus },
-        user,
+        user: userMock,
       });
       expect(response).toEqual<Task>(taskUpdated);
     });

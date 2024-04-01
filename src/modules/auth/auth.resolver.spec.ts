@@ -4,7 +4,7 @@ import { LocalStrategy } from './passport/local.strategy';
 import { AuthService } from './auth.service';
 import { MyLogger } from '../logger/my-logger.service';
 import { signInSucceeded } from './auth.test-data';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 
 describe('AuthResolver', () => {
@@ -22,7 +22,7 @@ describe('AuthResolver', () => {
           useValue: {
             signUp: jest.fn().mockResolvedValue(null),
             signIn: jest.fn().mockResolvedValue(signInSucceeded),
-            validateUser: jest.fn().mockResolvedValue(user),
+            validateUser: jest.fn().mockResolvedValue(userMock),
           },
         },
         {
@@ -46,13 +46,13 @@ describe('AuthResolver', () => {
 
   describe('signUp', () => {
     it('should call the expected underlying services and create a verbose log', async () => {
-      const { username, password } = user;
+      const { username, password } = userMock;
       const authCredentialsDto: AuthCredentialsDto = { username, password };
 
       await authResolver.signUp(authCredentialsDto);
 
       expect(logger.verbose).toHaveBeenCalledWith(
-        `User "${user.username}" is signing up`,
+        `User "${userMock.username}" is signing up`,
       );
 
       expect(authService.signUp).toHaveBeenCalledWith(authCredentialsDto);
@@ -61,12 +61,12 @@ describe('AuthResolver', () => {
 
   describe('signIn', () => {
     it('should call the expected underlying services, create a verbose log and return the expected response', async () => {
-      const response = await authResolver.signIn(user);
+      const response = await authResolver.signIn(userMock);
 
       expect(logger.verbose).toHaveBeenCalledWith(
-        `User "${user.id}" is signing in`,
+        `User "${userMock.id}" is signing in`,
       );
-      expect(authService.signIn).toHaveBeenCalledWith(user);
+      expect(authService.signIn).toHaveBeenCalledWith(userMock);
       expect(response).toBe(signInSucceeded);
     });
   });

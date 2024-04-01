@@ -5,7 +5,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Task } from './task.entity';
 import { TASK_REPOSITORY } from './task.constants';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { tasks } from './tasks.test-data';
 import { TaskStatus } from './types/task.status.enum';
 import {
@@ -64,7 +64,7 @@ describe('TasksRepository', () => {
       };
 
       const myUser: User = {
-        ...user,
+        ...userMock,
         tasks: tasks.filter((task) => task.status === getTasksFilterDto.status),
       };
 
@@ -91,7 +91,7 @@ describe('TasksRepository', () => {
         status: TaskStatus.OPEN,
       };
       const myUser: User = {
-        ...user,
+        ...userMock,
         tasks: tasks.filter((task) => task.status === getTasksFilterDto.status),
       };
 
@@ -120,7 +120,7 @@ describe('TasksRepository', () => {
   describe('findById', () => {
     it("should return a user's task by the task id", async () => {
       const myUser: User = {
-        ...user,
+        ...userMock,
         tasks: [...tasks],
       };
 
@@ -134,7 +134,7 @@ describe('TasksRepository', () => {
 
     it('should throw a NotFoundException if a task is not found with the given id', async () => {
       const myUser: User = {
-        ...user,
+        ...userMock,
         tasks: [...tasks],
       };
 
@@ -162,7 +162,7 @@ describe('TasksRepository', () => {
       jest.spyOn(repository, 'create').mockReturnValue(task);
       jest.spyOn(repository, 'save').mockResolvedValue(task);
 
-      const taskCreated = await tasksRepository.create(createTaskDto, user);
+      const taskCreated = await tasksRepository.create(createTaskDto, userMock);
 
       expect(taskCreated).toBe(task);
     });
@@ -176,7 +176,9 @@ describe('TasksRepository', () => {
       });
 
       const taskId = 'mock-id';
-      await expect(tasksRepository.delete(taskId, user)).resolves.not.toThrow();
+      await expect(
+        tasksRepository.delete(taskId, userMock),
+      ).resolves.not.toThrow();
     });
 
     it('should throw a NotFoundException if a task is not found with the given id', async () => {
@@ -189,7 +191,9 @@ describe('TasksRepository', () => {
       const message = `Task with ID "${taskId}" not found`;
       const error = new NotFoundException(message);
 
-      await expect(tasksRepository.delete(taskId, user)).rejects.toThrow(error);
+      await expect(tasksRepository.delete(taskId, userMock)).rejects.toThrow(
+        error,
+      );
       expect(myLogger.verbose).toHaveBeenCalledWith(message);
     });
   });
@@ -209,7 +213,7 @@ describe('TasksRepository', () => {
       const taskUpdated = await tasksRepository.updateTitle({
         id: taskToUpdate.id,
         updateTaskTitleDto,
-        user,
+        user: userMock,
       });
 
       expect(taskUpdated).toEqual<Task>(expectedTask);
@@ -227,7 +231,7 @@ describe('TasksRepository', () => {
         tasksRepository.updateTitle({
           id: taskToUpdate.id,
           updateTaskTitleDto,
-          user,
+          user: userMock,
         }),
       ).rejects.toThrow(error);
       expect(myLogger.verbose).toHaveBeenCalledWith(message);
@@ -251,7 +255,7 @@ describe('TasksRepository', () => {
       const taskUpdated = await tasksRepository.updateDescription({
         id: taskToUpdate.id,
         updateTaskDescriptionDto,
-        user,
+        user: userMock,
       });
 
       expect(taskUpdated).toEqual<Task>(expectedTask);
@@ -271,7 +275,7 @@ describe('TasksRepository', () => {
         tasksRepository.updateDescription({
           id: taskToUpdate.id,
           updateTaskDescriptionDto,
-          user,
+          user: userMock,
         }),
       ).rejects.toThrow(error);
       expect(myLogger.verbose).toHaveBeenCalledWith(message);
@@ -295,7 +299,7 @@ describe('TasksRepository', () => {
       const taskUpdated = await tasksRepository.updateStatus({
         id: taskToUpdate.id,
         updateTaskStatusDto,
-        user,
+        user: userMock,
       });
 
       expect(taskUpdated).toEqual<Task>(expectedTask);
@@ -315,7 +319,7 @@ describe('TasksRepository', () => {
         tasksRepository.updateStatus({
           id: taskToUpdate.id,
           updateTaskStatusDto,
-          user,
+          user: userMock,
         }),
       ).rejects.toThrow(error);
       expect(myLogger.verbose).toHaveBeenCalledWith(message);

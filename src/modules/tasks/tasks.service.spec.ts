@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TasksRepository } from './tasks.repository';
 import { tasks, taskDone, taskOpen, taskInProgress } from './tasks.test-data';
 import { TaskStatus } from './types/task.status.enum';
-import { user } from '../users/users.test-data';
+import { userMock } from '../users/users.test-data';
 import { UpdateTaskDescriptionDto } from './dto/update-task-description.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskTitleDto } from './dto/update-task-title.dto';
@@ -51,36 +51,42 @@ describe('TasksService', () => {
 
   describe('getTasks', () => {
     it("should call 'findAll' from TasksRepository class and returns an array of tasks", async () => {
-      const response = await taskService.getTasks({}, user);
+      const response = await taskService.getTasks({}, userMock);
 
-      expect(tasksRepository.findAll).toHaveBeenCalledWith({}, user);
+      expect(tasksRepository.findAll).toHaveBeenCalledWith({}, userMock);
       expect(response).toBe(tasks);
     });
   });
 
   describe('getTaskById', () => {
     it("should call 'findById' from TasksRepository class and returns a task by its id", async () => {
-      const response = await taskService.getTaskById(taskDone.id, user);
+      const response = await taskService.getTaskById(taskDone.id, userMock);
 
-      expect(tasksRepository.findById).toHaveBeenCalledWith(taskDone.id, user);
+      expect(tasksRepository.findById).toHaveBeenCalledWith(
+        taskDone.id,
+        userMock,
+      );
       expect(response).toBe(taskDone);
     });
   });
 
   describe('createTask', () => {
     it("should call 'create' from TasksRepository class to create and return a new task", async () => {
-      const response = await taskService.createTask(taskOpen, user);
+      const response = await taskService.createTask(taskOpen, userMock);
 
-      expect(tasksRepository.create).toHaveBeenCalledWith(taskOpen, user);
+      expect(tasksRepository.create).toHaveBeenCalledWith(taskOpen, userMock);
       expect(response).toBe(taskOpen);
     });
   });
 
   describe('deleteTask', () => {
     it("should call 'delete' from TasksRepository class to delete a task", async () => {
-      const response = await taskService.deleteTask(taskOpen.id, user);
+      const response = await taskService.deleteTask(taskOpen.id, userMock);
 
-      expect(tasksRepository.delete).toHaveBeenCalledWith(taskOpen.id, user);
+      expect(tasksRepository.delete).toHaveBeenCalledWith(
+        taskOpen.id,
+        userMock,
+      );
       expect(response).toBe(null);
     });
   });
@@ -95,7 +101,7 @@ describe('TasksService', () => {
       const updateTaskTitleArgs = {
         id: taskOpen.id,
         updateTaskTitleDto,
-        user,
+        user: userMock,
       };
 
       const response = await taskService.updateTaskTitle(updateTaskTitleArgs);
@@ -122,7 +128,7 @@ describe('TasksService', () => {
       const updateTaskDescriptionArgs = {
         id: taskOpen.id,
         updateTaskDescriptionDto,
-        user,
+        user: userMock,
       };
 
       const response = await taskService.updateTaskDescription(
@@ -151,7 +157,7 @@ describe('TasksService', () => {
       const updateTaskStatusArgs = {
         id: taskOpen.id,
         updateTaskStatusDto,
-        user,
+        user: userMock,
       };
 
       const response = await taskService.updateTaskStatus(updateTaskStatusArgs);
