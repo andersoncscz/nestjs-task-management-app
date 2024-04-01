@@ -23,6 +23,7 @@ import { jwtSignOptions } from '../auth/auth.constants';
 import * as request from 'supertest';
 import { User } from '../users/user.entity';
 import { Task } from './task.entity';
+import { v4 } from 'uuid';
 
 describe('Tasks', () => {
   let app: INestApplication;
@@ -60,10 +61,12 @@ describe('Tasks', () => {
     tasksRepository = module.get<TasksRepository>(TasksRepository);
     usersRepository = module.get<UsersRepository>(UsersRepository);
     jwtService = module.get<JwtService>(JwtService);
+  });
 
-    const { username, password } = userMock;
+  beforeEach(async () => {
+    const { password } = userMock;
     const authCredentialsDto: AuthCredentialsDto = {
-      username,
+      username: `test-user-${v4()}@x.com`,
       password,
     };
 
@@ -90,35 +93,53 @@ describe('Tasks', () => {
 
   describe(TasksController, () => {
     describe('/GET /api/tasks', () => {
-      it('gets tasks', async () => {
-        const task1 = await tasksRepository.create(
-          { title: 'Task 1', description: 'task 1' },
-          testUser,
-        );
+      describe('when user has tasks', () => {
+        it('returns tasks', async () => {
+          const task1 = await tasksRepository.create(
+            { title: 'Task 1', description: 'task 1' },
+            testUser,
+          );
 
-        const task2 = await tasksRepository.create(
-          { title: 'Task 2', description: 'task 2' },
-          testUser,
-        );
+          const task2 = await tasksRepository.create(
+            { title: 'Task 2', description: 'task 2' },
+            testUser,
+          );
 
-        const expectedResponseBody: Task[] = [task1, task2];
+          const expectedResponseBody: Task[] = [task1, task2];
 
-        return await request(app.getHttpServer())
-          .get('/api/tasks')
-          .send()
-          .set({
-            authorization: `Bearer ${jwt}`,
-          })
-          .expect(HttpStatus.OK)
-          .expect(({ text }) => {
-            const responseBody = JSON.parse(text) as Task[];
-            const taskIds = responseBody.map((task) => task.id);
-            expectedResponseBody.map((task) => {
-              expect(taskIds.includes(task.id)).toBeTruthy();
+          return await request(app.getHttpServer())
+            .get('/api/tasks')
+            .send()
+            .set({
+              authorization: `Bearer ${jwt}`,
+            })
+            .expect(HttpStatus.OK)
+            .expect(({ text }) => {
+              const responseBody = JSON.parse(text) as Task[];
+              const taskIds = responseBody.map((task) => task.id);
+              expectedResponseBody.map((task) => {
+                expect(taskIds.includes(task.id)).toBeTruthy();
+              });
+
+              expect(responseBody.length).toEqual(expectedResponseBody.length);
             });
+        });
+      });
 
-            expect(responseBody.length).toEqual(expectedResponseBody.length);
-          });
+      describe('when user has no tasks', () => {
+        it('returns an empty array', async () => {
+          return await request(app.getHttpServer())
+            .get('/api/tasks')
+            .send()
+            .set({
+              authorization: `Bearer ${jwt}`,
+            })
+            .expect(HttpStatus.OK)
+            .expect(({ text }) => {
+              const responseBody = JSON.parse(text) as Task[];
+              expect(responseBody).toEqual([]);
+            });
+        });
       });
     });
   });
