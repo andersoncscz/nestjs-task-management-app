@@ -24,6 +24,7 @@ import * as request from 'supertest';
 import { User } from '../users/user.entity';
 import { Task } from './task.entity';
 import { v4 } from 'uuid';
+import { CreateTaskDto } from './dto/create-task.dto';
 
 describe('Tasks', () => {
   let app: INestApplication;
@@ -93,53 +94,137 @@ describe('Tasks', () => {
 
   describe(TasksController, () => {
     describe('/GET /api/tasks', () => {
-      describe('when user has tasks', () => {
-        it('returns tasks', async () => {
-          const task1 = await tasksRepository.create(
-            { title: 'Task 1', description: 'task 1' },
-            testUser,
-          );
+      it('returns all tasks that a user has', async () => {
+        const task1 = await tasksRepository.create(
+          { title: 'Task 1', description: 'task 1' },
+          testUser,
+        );
 
-          const task2 = await tasksRepository.create(
-            { title: 'Task 2', description: 'task 2' },
-            testUser,
-          );
+        const task2 = await tasksRepository.create(
+          { title: 'Task 2', description: 'task 2' },
+          testUser,
+        );
 
-          const expectedResponseBody: Task[] = [task1, task2];
+        const expectedResponseBody: Task[] = [task1, task2];
 
-          return await request(app.getHttpServer())
-            .get('/api/tasks')
-            .send()
-            .set({
-              authorization: `Bearer ${jwt}`,
-            })
-            .expect(HttpStatus.OK)
-            .expect(({ text }) => {
-              const responseBody = JSON.parse(text) as Task[];
-              const taskIds = responseBody.map((task) => task.id);
-              expectedResponseBody.map((task) => {
-                expect(taskIds.includes(task.id)).toBeTruthy();
-              });
-
-              expect(responseBody.length).toEqual(expectedResponseBody.length);
+        return await request(app.getHttpServer())
+          .get('/api/tasks')
+          .send()
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.OK)
+          .expect(({ text }) => {
+            const tasks = JSON.parse(text) as Task[];
+            const taskIds = tasks.map((task) => task.id);
+            expectedResponseBody.map((task) => {
+              expect(taskIds.includes(task.id)).toBeTruthy();
             });
-        });
+
+            expect(tasks.length).toEqual(expectedResponseBody.length);
+          });
       });
 
-      describe('when user has no tasks', () => {
-        it('returns an empty array', async () => {
-          return await request(app.getHttpServer())
-            .get('/api/tasks')
-            .send()
-            .set({
-              authorization: `Bearer ${jwt}`,
-            })
-            .expect(HttpStatus.OK)
-            .expect(({ text }) => {
-              const responseBody = JSON.parse(text) as Task[];
-              expect(responseBody).toEqual([]);
-            });
-        });
+      it('returns an empty array when user has no tasks', async () => {
+        return await request(app.getHttpServer())
+          .get('/api/tasks')
+          .send()
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.OK)
+          .expect(({ text }) => {
+            const tasks = JSON.parse(text) as Task[];
+            expect(tasks).toEqual([]);
+          });
+      });
+
+      it('throws a Unauthorized exception when access token is missing or expired', async () => {
+        return await request(app.getHttpServer())
+          .get('/api/tasks')
+          .send()
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('/GET /:id/', () => {
+      it('returns a task by the given id', async () => {
+        const task1 = await tasksRepository.create(
+          { title: 'Task 1', description: 'task 1' },
+          testUser,
+        );
+
+        return await request(app.getHttpServer())
+          .get(`/api/tasks/${task1.id}`)
+          .send()
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.OK)
+          .expect(({ text }) => {
+            const taskFound = JSON.parse(text) as Task;
+
+            expect(taskFound).toBeDefined();
+            expect(taskFound.id).toEqual(task1.id);
+          });
+      });
+
+      it('throws a NotFound exception when the task is not found for the given id', async () => {
+        return await request(app.getHttpServer())
+          .get(`/api/tasks/${v4()}`)
+          .send()
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.NOT_FOUND);
+      });
+
+      it('throws a Unauthorized exception when access token is missing or expired', async () => {
+        return await request(app.getHttpServer())
+          .get(`/api/tasks/${v4()}`)
+          .send()
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('POST /api/tasks', () => {
+      it('creates a new task', async () => {
+        const createTaskDto: CreateTaskDto = {
+          title: 'New task',
+          description: 'description',
+        };
+
+        return await request(app.getHttpServer())
+          .post('/api/tasks/')
+          .send(createTaskDto)
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.CREATED)
+          .expect(({ text }) => {
+            const taskCreated = JSON.parse(text) as Task;
+
+            expect(taskCreated).toBeDefined();
+            expect(taskCreated.title).toEqual(createTaskDto.title);
+            expect(taskCreated.description).toEqual(createTaskDto.description);
+          });
+      });
+
+      it.skip('throws a BadRequest exception for bad or missing params', async () => {
+        return await request(app.getHttpServer())
+          .post('/api/tasks/')
+          .send({}) // @TODO: Class validator validations are not running on e2e tests.
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('throws a Unauthorized exception when access token is missing or expired', async () => {
+        return await request(app.getHttpServer())
+          .post('/api/tasks/')
+          .send()
+          .expect(HttpStatus.UNAUTHORIZED);
       });
     });
   });

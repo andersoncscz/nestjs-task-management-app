@@ -55,6 +55,7 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
+    console.log(createTaskDto);
     this.logger.verbose(
       `User "${user.id}" is creating a new task with params ${JSON.stringify(createTaskDto)}`,
     );
