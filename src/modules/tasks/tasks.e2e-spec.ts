@@ -213,6 +213,29 @@ describe('Tasks', () => {
           });
       });
 
+      it('throws a BadRequest exception for invalid params', async () => {
+        const createTaskDto: CreateTaskDto = {
+          title: 'A',
+          description: 'D',
+        };
+
+        const expectedErrorMessages = [
+          'title must be longer than or equal to 3 characters',
+          'description must be longer than or equal to 3 characters',
+        ];
+
+        return await request(app.getHttpServer())
+          .post('/api/tasks/')
+          .send(createTaskDto)
+          .set({
+            authorization: `Bearer ${jwt}`,
+          })
+          .expect(HttpStatus.BAD_REQUEST)
+          .expect((response) => {
+            expect(response.body.message).toEqual(expectedErrorMessages);
+          });
+      });
+
       it('throws a BadRequest exception for bad or missing params', async () => {
         return await request(app.getHttpServer())
           .post('/api/tasks/')
