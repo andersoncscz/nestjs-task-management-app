@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { TasksController } from './tasks.controller';
 import { DataSource } from 'typeorm';
 import { TasksRepository } from './tasks.repository';
@@ -25,6 +25,7 @@ import { User } from '../users/user.entity';
 import { Task } from './task.entity';
 import { v4 } from 'uuid';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { TransformInterceptor } from '../../interceptors/transform.interceptor';
 
 describe('Tasks', () => {
   let app: INestApplication;
@@ -56,6 +57,8 @@ describe('Tasks', () => {
     }).compile();
 
     app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalInterceptors(new TransformInterceptor());
     await app.init();
 
     dataSource = module.get<DataSource>(DATA_SOURCE);
@@ -210,10 +213,9 @@ describe('Tasks', () => {
           });
       });
 
-      it.skip('throws a BadRequest exception for bad or missing params', async () => {
+      it('throws a BadRequest exception for bad or missing params', async () => {
         return await request(app.getHttpServer())
           .post('/api/tasks/')
-          .send({}) // @TODO: Class validator validations are not running on e2e tests.
           .set({
             authorization: `Bearer ${jwt}`,
           })
