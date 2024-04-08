@@ -75,10 +75,10 @@ describe('Auth', () => {
           .post('/api/auth/signup')
           .send(authCredentialsDto)
           .expect(HttpStatus.CREATED)
-          .expect(({ text }) => {
-            const responseBody = JSON.parse(text) as SignInSucceeded;
+          .expect(({ body }) => {
+            const responseBody = body as SignInSucceeded;
 
-            expect(responseBody).toEqual(expectedResponseBody);
+            expect(responseBody).toEqual<SignInSucceeded>(expectedResponseBody);
             expect(responseBody.access_token.length > 0).toBeTruthy();
           });
       });
@@ -101,10 +101,10 @@ describe('Auth', () => {
           .post('/api/auth/signin')
           .send(authCredentialsDto)
           .expect(HttpStatus.OK)
-          .expect(({ text }) => {
-            const responseBody = JSON.parse(text) as SignInSucceeded;
+          .expect(({ body }) => {
+            const responseBody = body as SignInSucceeded;
 
-            expect(responseBody).toEqual(expectedResponseBody);
+            expect(responseBody).toEqual<SignInSucceeded>(expectedResponseBody);
             expect(responseBody.access_token.length > 0).toBeTruthy();
           });
       });
@@ -143,7 +143,7 @@ describe('Auth', () => {
             .expect(200);
 
           const mutationResult = response.body.data.signUp;
-          expect(mutationResult).toEqual(expectedResponseBody);
+          expect(mutationResult).toEqual<SignInSucceeded>(expectedResponseBody);
           expect(mutationResult.access_token.length > 0).toBeTruthy();
         });
       });
@@ -178,7 +178,7 @@ describe('Auth', () => {
             .expect(HttpStatus.OK);
 
           const mutationResult = response.body.data.signIn;
-          expect(mutationResult).toEqual(expectedResponseBody);
+          expect(mutationResult).toEqual<SignInSucceeded>(expectedResponseBody);
           expect(mutationResult.access_token.length > 0).toBeTruthy();
         });
 

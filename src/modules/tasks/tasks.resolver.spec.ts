@@ -56,7 +56,7 @@ describe('TasksResolver', () => {
       const response = await tasksResolver.getTasks(filterDto, contextMock);
 
       expect(tasksService.getTasks).toHaveBeenCalledWith(filterDto, userMock);
-      expect(response).toEqual(tasks);
+      expect(response).toEqual<Task[]>(tasks);
     });
   });
 

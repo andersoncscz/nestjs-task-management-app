@@ -117,14 +117,14 @@ describe('Tasks', () => {
             authorization: `Bearer ${jwt}`,
           })
           .expect(HttpStatus.OK)
-          .expect(({ text }) => {
-            const tasks = JSON.parse(text) as Task[];
+          .expect(({ body }) => {
+            const tasks = body as Task[];
             const taskIds = tasks.map((task) => task.id);
             expectedResponseBody.map((task) => {
               expect(taskIds.includes(task.id)).toBeTruthy();
             });
 
-            expect(tasks.length).toEqual(expectedResponseBody.length);
+            expect(tasks.length).toBe(expectedResponseBody.length);
           });
       });
 
@@ -136,9 +136,9 @@ describe('Tasks', () => {
             authorization: `Bearer ${jwt}`,
           })
           .expect(HttpStatus.OK)
-          .expect(({ text }) => {
-            const tasks = JSON.parse(text) as Task[];
-            expect(tasks).toEqual([]);
+          .expect(({ body }) => {
+            const tasks = body as Task[];
+            expect(tasks).toEqual<Task[]>([]);
           });
       });
 
@@ -164,11 +164,11 @@ describe('Tasks', () => {
             authorization: `Bearer ${jwt}`,
           })
           .expect(HttpStatus.OK)
-          .expect(({ text }) => {
-            const taskFound = JSON.parse(text) as Task;
+          .expect(({ body }) => {
+            const taskFound = body as Task;
 
             expect(taskFound).toBeDefined();
-            expect(taskFound.id).toEqual(task1.id);
+            expect(taskFound.id).toBe(task1.id);
           });
       });
 
@@ -204,12 +204,12 @@ describe('Tasks', () => {
             authorization: `Bearer ${jwt}`,
           })
           .expect(HttpStatus.CREATED)
-          .expect(({ text }) => {
-            const taskCreated = JSON.parse(text) as Task;
+          .expect(({ body }) => {
+            const taskCreated = body as Task;
 
             expect(taskCreated).toBeDefined();
-            expect(taskCreated.title).toEqual(createTaskDto.title);
-            expect(taskCreated.description).toEqual(createTaskDto.description);
+            expect(taskCreated.title).toBe(createTaskDto.title);
+            expect(taskCreated.description).toBe(createTaskDto.description);
           });
       });
 
@@ -232,7 +232,9 @@ describe('Tasks', () => {
           })
           .expect(HttpStatus.BAD_REQUEST)
           .expect((response) => {
-            expect(response.body.message).toEqual(expectedErrorMessages);
+            expect(response.body.message).toEqual<string[]>(
+              expectedErrorMessages,
+            );
           });
       });
 
